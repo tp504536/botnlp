@@ -10,6 +10,8 @@ def pog(city):
     temp = soup.find( 'div' , attrs = { 'class' : 'BNeawe iBp4i AP7Wnd' }).text
     return temp
 
+def search(search):
+    r = r
 
 # str = soup.find( 'div' , attrs = { 'class' : 'BNeawe tAd8D AP7Wnd' }).text
 # # format the data

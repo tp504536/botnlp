@@ -4,10 +4,11 @@ import nltk
 import numpy as np
 import random
 from nltk.stem import WordNetLemmatizer
+import pymorphy2
 import tensorflow
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout
-
+morph = pymorphy2.MorphAnalyzer()
 nltk.download("punkt")  # required package for tokenization
 nltk.download("wordnet")  # word database
 nltk.download('omw-1.4')
