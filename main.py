@@ -34,9 +34,15 @@ class FSMdata_time(StatesGroup):
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
     await message.answer('хахахаха ' + message.from_user.first_name)
+
+
 @dp.message_handler(commands='help')
-async def help(message:types.Message):
-    await message.answer('help')
+async def help(message: types.Message):
+    await message.answer(
+        'Я бот Валера!\nМогу пообщаться с тобой,подсказать дату и время.\n'
+        'Найти что нибудь в википедии "Валера и вопрос".\n'
+        'Сделать напоминание напиши "запомни или запиши и тд"')
+
 
 @dp.message_handler(content_types=['text', 'photo'])
 async def message(message: types.Message):
@@ -69,7 +75,7 @@ async def message(message: types.Message):
                 delet = types.InlineKeyboardButton('Удалить', callback_data='delet')
                 notes.add(delet)
                 count = db.message(message.from_user.id)
-                count = str(count).replace('[','').replace(']','').replace('(','').replace(')','').replace('\'','')
+                count = str(count).replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('\'', '')
                 await message.answer('Твои заметки\n\n' + count, reply_markup=notes)
             elif ints[0]['intent'] == 'time':
                 await message.answer(str(datetime.datetime.today().strftime("%Y-%m-%d-%H:%M")))
@@ -136,6 +142,7 @@ async def data(message: types.Message, state: FSMContext):
         except:
             await message.answer('Вы ввели не правильно дату. Попробуйте еще раз!!\n\nПример 2022-06-29 17:08')
 
+
 @dp.callback_query_handler(text='date_no')
 async def no_date(call: types.CallbackQuery):
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
@@ -145,10 +152,12 @@ async def no_date(call: types.CallbackQuery):
 
 @dp.callback_query_handler(text='date_yes')
 async def yes_date(call: types.CallbackQuery):
-    db.add_date(date_time_obj,call.from_user.id)
+    db.add_date(date_time_obj, call.from_user.id)
     await call.message.answer('Установил напоминание')
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
     # await call.message.answer('Я успешно сохранил вашу мысль ')
+
+
 if __name__ == "__main__":
     # Запуск бота
     executor.start_polling(dp, skip_updates=True)
