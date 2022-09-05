@@ -1,6 +1,8 @@
 import logging
 import subprocess
 import datetime
+
+import aiocron
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -33,15 +35,15 @@ class FSMdata_time(StatesGroup):
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    await message.answer('хахахаха ' + message.from_user.first_name)
+    await message.answer('Для запуска бота напиши привет!!')
 
 
 @dp.message_handler(commands='help')
 async def help(message: types.Message):
     await message.answer(
         'Я бот Валера!\nМогу пообщаться с тобой,подсказать дату и время.\n'
-        'Найти что нибудь в википедии "Валера и вопрос".\n'
-        'Сделать напоминание напиши "запомни или запиши и тд"')
+        'Найти что-нибудь в википедии "Валера и вопрос".\n'
+        'Сделать напоминание - напиши "запомни или запиши и тд"')
 
 
 @dp.message_handler(content_types=['text', 'photo'])
@@ -49,24 +51,19 @@ async def message(message: types.Message):
     if message.text:
         ints = predict_class(message.text)
         if float(ints[0]['probability']) < 0.90:
-            print('я тебя не понял')
-            await message.answer('К сожеления я еще не все выучил')
+            await message.answer('К сожалению, я еще не все выучил')
         else:
             res = get_response(ints, date)
-            print(res)
-            print(ints[0]['intent'])
             await message.answer(str(res))
             b = message.text.lower()
             if re.search(r'валера', b):
-                print(re.search(r'валера', b))
                 a = b.split('валера', 1)[1]
                 try:
                     await message.answer(wk.summary(a, sentences=1))
                 except:
-                    await message.answer('К сожаления не чего не нашлось😞 Напиши например пиво, биткойн, виски')
+                    await message.answer('К сожалению, ничего не нашлось😞 Напиши например пиво, биткойн, виски')
             elif re.search(r'погода', b):
                 g = b.split('погода', 1)[1]
-                print(type(g))
                 await message.answer(pog(g))
             elif ints[0]['intent'] == 'reminder':
                 await FSMmain.get_main.set()
@@ -75,13 +72,16 @@ async def message(message: types.Message):
                 delet = types.InlineKeyboardButton('Удалить', callback_data='delet')
                 notes.add(delet)
                 count = db.message(message.from_user.id)
-                count = str(count).replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('\'', '')
-                await message.answer('Твои заметки\n\n' + count, reply_markup=notes)
+                if len(count) == 0:
+                    await message.answer('У вас нет заметок')
+                else:
+                    count = str(count).replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('\'', '')
+                    await message.answer('Твои заметки\n\n' + count, reply_markup=notes)
             elif ints[0]['intent'] == 'time':
                 await message.answer(str(datetime.datetime.today().strftime("%Y-%m-%d-%H:%M")))
 
     else:
-        await message.answer('Зачем ты мне это прислал')
+        await message.answer('Зачем ты мне это прислал?')
 
 
 @dp.message_handler(content_types='text', state=FSMmain.get_main)
@@ -102,7 +102,7 @@ async def final(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text='not')
 async def no(call: types.CallbackQuery):
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
-    await call.message.answer('Я рад что не запишу этот бред')
+    await call.message.answer('Я рад ,что не запишу этот бред')
 
 
 @dp.callback_query_handler(text='yes')
@@ -136,11 +136,12 @@ async def data(message: types.Message, state: FSMContext):
         date_key.add(date_s).add(date_n)
         try:
             date_time_obj = datetime.datetime.strptime(data['text'], '%Y-%m-%d %H:%M')
+            date_time_obj= date_time_obj.strftime("%Y-%m-%d %H:%M")
             await state.finish()
             await message.answer("Дата \n\n " + str(date_time_obj) + "\n\nВы уверены?", reply_markup=date_key)
             await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
         except:
-            await message.answer('Вы ввели не правильно дату. Попробуйте еще раз!!\n\nПример 2022-06-29 17:08')
+            await message.answer('Вы ввели неправильно дату. Попробуйте еще раз!!\n\nПример 2022-06-29 17:08')
 
 
 @dp.callback_query_handler(text='date_no')
@@ -155,9 +156,12 @@ async def yes_date(call: types.CallbackQuery):
     db.add_date(date_time_obj, call.from_user.id)
     await call.message.answer('Установил напоминание')
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
-    # await call.message.answer('Я успешно сохранил вашу мысль ')
 
-
+@aiocron.crontab('*/1 * * * *')
+async def add_money():
+    for i in db.date_2_1():
+        await bot.send_message(i[0],str(i[1]))
+        db.delet(i[0])
 if __name__ == "__main__":
     # Запуск бота
     executor.start_polling(dp, skip_updates=True)

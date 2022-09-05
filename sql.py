@@ -41,3 +41,13 @@ class Database:
         with self.connection:
             result = self.cursor.execute('DELETE FROM users WHERE user_id = ?', (user_id,))
             return result
+    def time(self):
+        with self.connection:
+            result = self.cursor.execute('SELECT date FROM users').fetchall()
+            return result
+
+
+    def date_2_1(self):
+        """Получаем всех пользователей count 1"""
+        with self.connection:
+            return self.cursor.execute("SELECT user_id,notes FROM users WHERE date = strftime('%Y-%m-%d %H:%M', 'now','localtime')").fetchall()

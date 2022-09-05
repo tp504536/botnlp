@@ -13,7 +13,7 @@ nltk.download("punkt")  # required package for tokenization
 nltk.download("wordnet")  # word database
 nltk.download('omw-1.4')
 
-date = json.load(open('test1.json'))
+date = json.load(open('test1.json',encoding="utf8"))
 
 lm = WordNetLemmatizer()
 # lists
