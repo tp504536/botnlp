@@ -16,24 +16,28 @@ class Database:
             result = self.cursor.execute('INSERT INTO users (user_id, notes) VALUES (?,?)', (user_id, notepad))
             return result
 
-    def count(self,user_id):
-        with self.connection:
-            result = self.cursor.execute('SELECT COUNT(notes) FROM users WHERE user_id =?', (user_id,)).fetchall()
-            print(result)
-            return result[0]
+    # def count(self,user_id):
+    #     with self.connection:
+    #         result = self.cursor.execute('SELECT COUNT(notes) FROM users WHERE user_id =?', (user_id,)).fetchall()
+    #         print(result)
+    #         return result[0]
 
-    def read(self,user_id):
+    def message(self, user_id):
+        with self.connection:
+            result = self.cursor.execute('SELECT notes,date FROM users WHERE user_id = ?', (user_id,)).fetchall()
+            return result
+
+    def read(self, user_id):
         with self.connection:
             result = self.cursor.execute('SELECT notes FROM users WHERE user_id =?', (user_id,)).fetchall()
-            print(result)
             return result
-    # def count_referals(self, user_id):
-    #     with self.connection:
-    #         #return self.cursor.execute("SELECT COUNT('id') as count FROM 'users' WHERE 'referrer_id' = ?", (user_id,)).fetchone()[0]
-    #         result = self.cursor.execute('SELECT user_id FROM users WHERE referrer_id = ?',(user_id,)).fetchall()
-    #         return len(result)
-    #
-    # def get_buildings(self, user_id):
-    #     with self.connection:
-    #         result = self.cursor.execute('SELECT farm1, farm2, farm3 FROM users WHERE user_id = ?',(user_id,)).fetchall()
-    #         return result
+
+    def add_date(self, date, user_id):
+        with self.connection:
+            result = self.cursor.execute('UPDATE users SET date = ? WHERE user_id = ?', (date, user_id))
+            return result
+
+    def delet(self, user_id):
+        with self.connection:
+            result = self.cursor.execute('DELETE FROM users WHERE user_id = ?', (user_id,))
+            return result
