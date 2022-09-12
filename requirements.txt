@@ -1,0 +1,6 @@
+aiogram
+wikipedia
+beautifulsoup4
+nltk
+tensorflow
+keras

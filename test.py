@@ -10,8 +10,12 @@ def pog(city):
     temp = soup.find( 'div' , attrs = { 'class' : 'BNeawe iBp4i AP7Wnd' }).text
     return temp
 
-def search(search):
-    r = r
+# def search(var):
+#     r = requests.get(f"https://www.google.com/search?q="+'%22+%20'+ var).content
+#     soup = bs4.BeautifulSoup(r,'html.parser')
+#     temp = soup.find('div',attrs={'class': 'dvZgKd'}).text
+#     print(temp)
+# search('биткойн')
 
 # str = soup.find( 'div' , attrs = { 'class' : 'BNeawe tAd8D AP7Wnd' }).text
 # # format the data

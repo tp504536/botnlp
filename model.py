@@ -4,11 +4,9 @@ import nltk
 import numpy as np
 import random
 from nltk.stem import WordNetLemmatizer
-import pymorphy2
 import tensorflow
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout
-morph = pymorphy2.MorphAnalyzer()
 nltk.download("punkt")  # required package for tokenization
 nltk.download("wordnet")  # word database
 nltk.download('omw-1.4')
@@ -37,51 +35,51 @@ newWords = [lm.lemmatize(word.lower()) for word in newWords if
 newWords = sorted(set(newWords))  # sorting words
 ourClasses = sorted(set(ourClasses))  # sorting classes
 
-trainingData = []  # training list array
-outEmpty = [0] * len(ourClasses)
-# bow model
-for idx, doc in enumerate(documentX):
-    bagOfwords = []
-    text = lm.lemmatize(doc.lower())
-    for word in newWords:
-        bagOfwords.append(1) if word in text else bagOfwords.append(0)
-
-    outputRow = list(outEmpty)
-    outputRow[ourClasses.index(documentY[idx])] = 1
-    trainingData.append([bagOfwords, outputRow])
-
-random.shuffle(trainingData)
-trainingData = np.array(trainingData, dtype=object)  # coverting our data into an array afterv shuffling
-
-x = np.array(list(trainingData[:, 0]))  # first trainig phase
-y = np.array(list(trainingData[:, 1]))  # second training phase
-
-iShape = (len(x[0]),)
-oShape = len(y[0])
-# parameter definition
-ourNewModel = Sequential()
+# trainingData = []  # training list array
+# outEmpty = [0] * len(ourClasses)
+# # bow model
+# for idx, doc in enumerate(documentX):
+#     bagOfwords = []
+#     text = lm.lemmatize(doc.lower())
+#     for word in newWords:
+#         bagOfwords.append(1) if word in text else bagOfwords.append(0)
+#
+#     outputRow = list(outEmpty)
+#     outputRow[ourClasses.index(documentY[idx])] = 1
+#     trainingData.append([bagOfwords, outputRow])
+#
+# random.shuffle(trainingData)
+# trainingData = np.array(trainingData, dtype=object)  # coverting our data into an array afterv shuffling
+#
+# x = np.array(list(trainingData[:, 0]))  # first trainig phase
+# y = np.array(list(trainingData[:, 1]))  # second training phase
+#
+# iShape = (len(x[0]),)
+# oShape = len(y[0])
+# # parameter definition
+# ourNewModel = Sequential()
 # In the case of a simple stack of layers, a Sequential model is appropriate
 
 # Dense function adds an output layer
-ourNewModel.add(Dense(128, input_shape=iShape, activation="relu"))
-# The activation function in a neural network is in charge of converting the node's summed weighted input into activation of the node or output for the input in question
-ourNewModel.add(Dropout(0.5))
-# Dropout is used to enhance visual perception of input neurons
-ourNewModel.add(Dense(64, activation="relu"))
-ourNewModel.add(Dropout(0.3))
-ourNewModel.add(Dense(oShape, activation="softmax"))
-# below is a callable that returns the value to be used with no arguments
-md = tensorflow.keras.optimizers.Adam(learning_rate=0.01, decay=1e-6)
-# Below line improves the numerical stability and pushes the computation of the probability distribution into the categorical crossentropy loss function.
-ourNewModel.compile(loss='categorical_crossentropy',
-                    optimizer=md,
-                    metrics=["accuracy"])
-# Output the model in summary
-print(ourNewModel.summary())
-# Whilst training your Nural Network, you have the option of making the output verbose or simple.
-ourNewModel.fit(x, y, epochs=200, verbose=1)
-# By epochs, we mean the number of times you repeat a training set.
-ourNewModel.save('model')
+# ourNewModel.add(Dense(128, input_shape=iShape, activation="relu"))
+# # The activation function in a neural network is in charge of converting the node's summed weighted input into activation of the node or output for the input in question
+# ourNewModel.add(Dropout(0.5))
+# # Dropout is used to enhance visual perception of input neurons
+# ourNewModel.add(Dense(64, activation="relu"))
+# ourNewModel.add(Dropout(0.3))
+# ourNewModel.add(Dense(oShape, activation="softmax"))
+# # below is a callable that returns the value to be used with no arguments
+# md = tensorflow.keras.optimizers.Adam(learning_rate=0.01, decay=1e-6)
+# # Below line improves the numerical stability and pushes the computation of the probability distribution into the categorical crossentropy loss function.
+# ourNewModel.compile(loss='categorical_crossentropy',
+#                     optimizer=md,
+#                     metrics=["accuracy"])
+# # Output the model in summary
+# print(ourNewModel.summary())
+# # Whilst training your Nural Network, you have the option of making the output verbose or simple.
+# ourNewModel.fit(x, y, epochs=200, verbose=1)
+# # By epochs, we mean the number of times you repeat a training set.
+# ourNewModel.save('model')
 
 load_model = tensorflow.keras.models.load_model('model')
 
@@ -123,12 +121,3 @@ def get_response(intents_list, intents_json):
             result = random.choice(i['responses'])
             return result
 
-# while True:
-#     message = input()
-#     ints = predict_class(message)
-#     print(type(ints[0]['probability']))
-#     if float(ints[0]['probability']) < 0.86:
-#         print('я тебя не понял')
-#     else:
-#         res = get_response(ints, date)
-#         print(res)
